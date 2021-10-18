@@ -1,0 +1,193 @@
+Tambahan Tugas
+1.	Penggunaan jenis navbar yang berbeda pada app.blade.php
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+        <a class="navbar-brand" href="#">Laravel Pertama</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/friends">Friends</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/familys">Family</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+
+2.	Penggunaan jenis card yang berbeda pada index.blade.php
+<div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Nama : {{ $friend['nama'] }}</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Nomor Telepon : {{ $friend['no_telp'] }}</li>
+            <li class="list-group-item">Alamat : {{ $friend['alamat'] }}</li>
+        </ul>
+        <div class="card-body">
+            <a href="#" class="card-link btn-warning">Edit Friends</a>
+            <a href="#" class="card-link btn-danger">Delete Friends</a>
+        </div>
+    </div>
+
+3.  Penambahan Models Familys
+Familys.php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Familys extends Model
+{
+    use HasFactory;
+}
+
+
+4.  Penambahan Route Family pada web.php
+Route::get('/familys', [App\Http\Controllers\CobaController::class, 'familys']);
+Route::get('/familys/tambah', [App\Http\Controllers\CobaController::class, 'tambah']);
+Route::post('/familys', [App\Http\Controllers\CobaController::class, 'storefamilys']);
+
+5.  Penambahan Function Familys, Tambah, dan Store Familys
+CobaControler.php
+public function familys(){
+        // memanggil model familys
+        $familys = familys::paginate(1);
+
+        return view('familys', compact('familys'));
+        // memakai compact karena memiliki banyak data array. di isi dengan nama variabel yang akan dipanggil
+    }
+
+    public function tambah(){
+        return view('tambah');
+    }
+
+    public function storefamilys(Request $request){
+        // Validate the request...
+
+        $familys = new Familys;
+
+        $familys->first_name = $request->first_name;
+        $familys->last_name = $request->last_name;
+        $familys->number_phone = $request->number_phone;
+        $familys->address = $request->address;
+        $familys->email = $request->email;
+
+        $familys->save();
+
+    }
+
+6.  Penambahan View Family
+familys.blade.php
+@extends('layouts.app')
+
+@section('title', 'Family')
+<!-- section key, value karena section ini bukan diambil dari file tetapi dari key-->
+
+@section('content')
+    <a href="/familys/tambah" class="card-link btn-primary">Add Family</a>
+<!-- karena angka yang kita gunakan adalah array dalam array sehingga memerlukan perulangan berupa foreach -->
+@foreach ($familys as $family)
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Name: {{ $family['first_name'] }} {{ $family['last_name'] }}</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Number Phone : {{ $family['number_phone'] }}</li>
+            <li class="list-group-item">Address : {{ $family['address'] }}</li>
+            <li class="list-group-item">Email : {{ $family['email'] }}</li>
+        </ul>
+        <div class="card-body">
+            <a href="#" class="card-link btn-warning">Edit Family</a>
+            <a href="#" class="card-link btn-danger">Delete Family</a>
+        </div>
+    </div>
+@endforeach
+    <div>
+    {{ $familys->links() }}
+    </div>
+@endsection
+<!-- end section hanya ditulis sekali aja di paling akhir -->
+
+
+7.  Penambahan View Add Family
+tambah.blade.php
+@extends('layouts.app')
+
+@section('title', 'Create Family')
+<!-- section key, value karena section ini bukan diambil dari file tetapi dari key-->
+
+@section('content')
+
+    <form action="/familys" method="POST">
+        @csrf
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+                <label for="validationServer01">First Name</label>
+                <input type="text" class="form-control is-valid" id="first_name" name="first_name" aria-describedby="first_name" required>
+                <div id="first_name" class="valid-feedback">
+                    Your Name Looks good!
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="validationServer02">Last name</label>
+                <input type="text" class="form-control is-valid" id="last_name" name="last_name" aria-describedby="last_name" required>
+                <div id="last_name" class="valid-feedback">
+                    Your Name Looks good!
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+            <label for="validationServer03">Number Phone</label>
+            <input type="text" class="form-control is-invalid" id="number_phone" name="number_phone" aria-describedby="number_phone" required>
+            <div id="number_phone" class="invalid-feedback">
+                Please provide a valid number.
+            </div>
+        </div>
+            <div class="form-row">
+            <div class="col-md-6 mb-3">
+            <label for="validationServer03">Address</label>
+            <input type="text" class="form-control is-invalid" id="address" name="address" aria-describedby="address" required>
+            <div id="address" class="invalid-feedback">
+                Please provide a valid address.
+            </div>
+        </div>
+        </div>
+            <div class="form-row">
+            <div class="col-md-6 mb-3">
+            <label for="validationServer03">Email</label>
+            <input type="email" class="form-control is-invalid" id="email" name="email" aria-describedby="email" required>
+            <div id="email" class="invalid-feedback">
+                Please provide a valid email address.
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+            <input class="form-check-input is-invalid" type="checkbox" value="" id="invalidCheck3" aria-describedby="invalidCheck3Feedback" required>
+            <label class="form-check-label" for="invalidCheck3">
+                Agree to terms and conditions
+            </label>
+            <div  id="invalidCheck3Feedback" class="invalid-feedback">
+                You must agree before submitting.
+            </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit form</button>
+    </form>
+
+@endsection
+<!-- end section hanya ditulis sekali aja di paling akhir -->
+
